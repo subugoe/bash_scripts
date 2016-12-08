@@ -1,0 +1,16 @@
+#!/bin/bash
+rename 's/ /_/g' *
+for file in `ls`
+do
+	filename=$(basename $file)
+	name="${filename%.*}"
+	ext="${filename##*.}"
+	if [ -f $file ] && [ "$ext" = "zip" ]
+	then
+		tgz=$name".tgz"
+		echo "ext: "$ext, "name: "$name, "tgz: "$tgz
+		mkdir $name
+		unzip $file -d $name
+		tar cfvz $tgz $name --remove-files
+	fi
+done

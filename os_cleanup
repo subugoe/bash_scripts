@@ -1,0 +1,34 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          os_cleanup
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     5
+# Default-Stop:      0 1 6
+# Short-Description: automatic cleanup the already deinstalled packages
+### END INIT INFO
+
+LOG_FILE=/tmp/os_cleanup.log
+# Creating the Log-File
+if [ ! -f $LOG_FILE ]
+then
+    touch $LOG_FILE
+fi
+sudo chown arash.arash $LOG_FILE
+
+LOG_TIME=`date '+%Y%M%d-%H:%M'`
+echo "** $LOG_TIME ** Starting the cleanup..."
+echo "** $LOG_TIME **"  2>&1 | tee -a $LOG_FILE
+echo "******************************"  2>&1 | tee -a $LOG_FILE
+
+for package in `sudo dpkg --get-selections  2>&1 | grep deinstall`
+do
+    if [ $package != "deinstall" ]
+    then
+        sudo apt-get purge $package -y  2>&1 | tee -a $LOG_FILE
+    fi
+done
+LOG_TIME=`date '+%Y%M%d-%H:%M'`
+echo "** $LOG_TIME **"  2>&1 | tee -a $LOG_FILE
+echo "** $LOG_TIME ** Cleanup finished..."
