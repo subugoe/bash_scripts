@@ -15,20 +15,20 @@ if [ ! -f $LOG_FILE ]
 then
     touch $LOG_FILE
 fi
-sudo chown arash.arash $LOG_FILE
+sudo chmod 0777 $LOG_FILE
 
 LOG_TIME=`date '+%Y%M%d-%H:%M'`
 echo "** $LOG_TIME ** Starting the cleanup..."
-echo "** $LOG_TIME **"  2>&1 | tee -a $LOG_FILE
-echo "******************************"  2>&1 | tee -a $LOG_FILE
+echo "** $LOG_TIME **"  2>&1 | tee --append $LOG_FILE
+echo "******************************"  2>&1 | tee --append $LOG_FILE
 
 for package in `sudo dpkg --get-selections  2>&1 | grep deinstall`
 do
     if [ $package != "deinstall" ]
     then
-        sudo apt-get purge $package -y  2>&1 | tee -a $LOG_FILE
+        sudo apt-get purge $package --assume-yes  2>&1 | tee --append $LOG_FILE
     fi
 done
 LOG_TIME=`date '+%Y%M%d-%H:%M'`
-echo "** $LOG_TIME **"  2>&1 | tee -a $LOG_FILE
+echo "** $LOG_TIME **"  2>&1 | tee --append $LOG_FILE
 echo "** $LOG_TIME ** Cleanup finished..."
