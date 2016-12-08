@@ -1,0 +1,65 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          os_update
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     5
+# Default-Stop:      0 1 6
+# Short-Description: automatic update and cleanup of the system
+#                    can be used with a cronjob
+#                    is modified for ubuntu prior to xenial (16)
+### END INIT INFO
+
+LOG_FILE=/var/log/os_update.log
+# Time function
+function current {
+    if [ -n $LOG_TIME ]
+    then
+        unset $LOG_TIME
+    fi
+    LOG_TIME=`date '+%Y%M%d-%H:%M'`
+}
+# Creating the Log-File
+if [ ! -f $LOG_FILE ]
+then
+    touch $LOG_FILE
+fi
+sudo chown 1000.1000 $LOG_FILE
+# Starting
+echo "** $LOG_TIME ** Starting the update..."
+echo "******************************"  2>&1 | tee --append $LOG_FILE
+echo "** Cleaning up before head  **"  2>&1 | tee --append $LOG_FILE
+echo "******************************"  2>&1 | tee --append $LOG_FILE
+LOG_TIME=`date '+%Y%M%d-%H:%M'`
+echo "** $LOG_TIME **"  2>&1 | tee --append $LOG_FILE
+sudo rm --recursive --force /var/lib/apt/lists 2>&1 | tee --append $LOG_FILE
+sudo mkdir --parents /var/lib/apt/lists/partial 2>&1 | tee --append $LOG_FILE
+sudo chmod +x /var/lib/apt/lists/partial 2>&1 | tee --append $LOG_FILE
+sudo apt clean  2>&1 | tee --append $LOG_FILE
+echo "******************************"  2>&1 | tee --append $LOG_FILE
+echo "** Updating the database... **"  2>&1 | tee --append $LOG_FILE
+echo "******************************"  2>&1 | tee --append $LOG_FILE
+LOG_TIME=`date '+%Y%M%d-%H:%M'`
+echo "** $LOG_TIME **"  2>&1 | tee --append $LOG_FILE
+sudo apt update  2>&1 | tee --append $LOG_FILE
+echo "******************************"  2>&1 | tee --append $LOG_FILE
+echo "** Ugrading the software... **"  2>&1 | tee --append $LOG_FILE
+echo "******************************"  2>&1 | tee --append $LOG_FILE
+LOG_TIME=`date '+%Y%M%d-%H:%M'`
+echo "** $LOG_TIME **"  2>&1 | tee --append $LOG_FILE
+sudo apt upgrade --assume-yes   2>&1 | tee --append $LOG_FILE
+echo "*****************************"  2>&1 | tee --append $LOG_FILE
+echo "** Upgrading the kernel... **"  2>&1 | tee --append $LOG_FILE
+echo "*****************************"  2>&1 | tee --append $LOG_FILE
+LOG_TIME=`date '+%Y%M%d-%H:%M'`
+echo "** $LOG_TIME **"  2>&1 | tee --append $LOG_FILE
+sudo apt --fix-broken install --assume-yes   2>&1 | tee --append $LOG_FILE
+echo "****************************************"  2>&1 | tee --append $LOG_FILE
+echo "** Cleaning up the unused packages... **"  2>&1 | tee --append $LOG_FILE
+echo "****************************************"  2>&1 | tee --append $LOG_FILE
+LOG_TIME=`date '+%Y%M%d-%H:%M'`
+echo "** $LOG_TIME **"  2>&1 | tee --append $LOG_FILE
+sudo apt --purge autoremove --assume-yes  2>&1 | tee --append $LOG_FILE
+LOG_TIME=`date '+%Y%M%d-%H:%M'`
+echo "** $LOG_TIME ** Update finished..."
